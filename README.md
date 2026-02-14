@@ -27,7 +27,7 @@ pkg install python3
 Run the command below to automatically download and start the tool:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/danger24bot/miunlock/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/helproot/MiCommunityPermissionTool/main/install.sh | bash
 
 ```
 ### ▶️ Run Tool
