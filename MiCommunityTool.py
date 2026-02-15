@@ -24,7 +24,7 @@ version = "1.5.3"
 # ===== TELEGRAM VERIFY =====
 BOT_TOKEN = "7955185832:AAH4_TJyi_P78BFkHnBl32d3CgD4sdZ7Gxo"
 CHANNEL_USERNAME = "@helproot"
-# ===== COLORS =====
+# ===== COS =====
 CYAN = "\033[96m"
 GREEN = "\033[92m"
 YELLOW = "\033[93m"
@@ -49,84 +49,7 @@ def check_telegram_join(user_id):
     try:
         r = requests.get(url, params={
             "chat_id": CHANNEL_USERNAME,
-            "user_id": user_id
-        }).json()
-
-        if r.get("ok"):
-            status = r["result"]["status"]
-            return status in ["member", "administrator", "creator"]
-
-    except Exception as e:
-        print(f"Telegram verify error: {e}")
-
-    return False
-    # ===== COLORS =====
-CYAN = "\033[96m"
-GREEN = "\033[92m"
-YELLOW = "\033[93m"
-RED = "\033[91m"
-WHITE = "\033[97m"
-BOLD = "\033[1m"
-RESET = "\033[0m"
-
-print(
-    f"\n{CYAN}{BOLD}╔══════════════════════════════════════╗{RESET}\n"
-    f"{CYAN}{BOLD}║{RESET}       {WHITE}{BOLD}TELEGRAM JOIN VERIFICATION{RESET}     {CYAN}{BOLD}║{RESET}\n"
-    f"{CYAN}{BOLD}╠══════════════════════════════════════╣{RESET}\n"
-    f"{CYAN}{BOLD}║        {RESET} Join: {GREEN}t.me/helproot{RESET}          {CYAN}{BOLD}║{RESET}\n"
-    f"{CYAN}{BOLD}╚══════════════════════════════════════╝{RESET}"
-)
-
-tg_id = input(f"{YELLOW}➤ Enter your Telegram User ID: {RESET}").strip()
-
-# empty check
-if not tg_id:
-    exit(f"{RED}❌ Telegram User ID required!{RESET}")
-
-if not check_telegram_join(tg_id):
-    exit(f"{RED}❌ You must join the Telegram channel first!{RESET}")
-
-print(f"{GREEN}✅ Telegram verification successful!{RESET}\n")
-
-User = "okhttp/4.12.0"
-headers = {"User-Agent": User}
-
-def login():
-    base_url = "https://account.xiaomi.com"
-    sid = "18n_bbs_global"
-
-    # ===== COLORS =====
-    CYAN = "\033[96m"
-    YELLOW = "\033[93m"
-    WHITE = "\033[97m"
-    BOLD = "\033[1m"
-    RESET = "\033[0m"
-
-    print(
-        f"\n{CYAN}{BOLD}╔══════════════════════════════════════╗{RESET}"
-        f"\n{CYAN}{BOLD}║{RESET}   {WHITE}{BOLD}     Mi Account LOGIN PANEL{RESET}        {CYAN}{BOLD}║{RESET}"
-        f"\n{CYAN}{BOLD}╚══════════════════════════════════════╝{RESET}"
-    )
-
-    user = input(f"{YELLOW}➤ Enter Mi ID:{RESET} ")
-    pwd = input(f"{YELLOW}➤ Enter Mi Pwd :{RESET} ")
-
-    hash_pwd = hashlib.md5(pwd.encode()).hexdigest().upper()
-    cookies = {}
-
-    def parse(res):
-        return json.loads(res.text[11:])
-
-    r = requests.get(f"{base_url}/pass/serviceLogin", params={'sid': sid, '_json': True}, headers=headers, cookies=cookies)
-    cookies.update(r.cookies.get_dict())
-
-    deviceId = cookies["deviceId"]
-
-    data = {k: v[0] for k, v in parse_qs(urlparse(parse(r)['location']).query).items()}
-    data.update({'user': user, 'hash': hash_pwd})
-
-    r = requests.post(f"{base_url}/pass/serviceLoginAuth2", data=data, headers=headers, cookies=cookies)
-    cookies.update(r.cookies.get_dict())
+            "
     res = parse(r)
 
     if res["code"] == 70016: exit("invalid user or pwd")
@@ -138,7 +61,7 @@ def login():
         params = parse_qs(urlparse(url).query)
         cookies.update(requests.get(f"{base_url}/identity/list", params=params, headers=headers, cookies=cookies).cookies.get_dict())
 
-        email = parse(requests.get(f"{base_url}/identity/auth/verifyEmail", params={'_json': True}, cookies=cookies, headers=headers))['maskedEmail']
+     email = parse(requests.get(f"{base_url}/identity/auth/verifyEmail", params={'_json': True}, cookies=cookies, headers=headers))['maskedEmail']
         quota = parse(requests.post(f"{base_url}/identity/pass/sms/userQuota", data={'addressType': 'EM', 'contentType': 160040}, cookies=cookies, headers=headers))['info']
         print(f"Account Authentication\nemail: {email}, Remaining attempts: {quota}")
         input("\nPress Enter to send the verification code")
@@ -159,85 +82,7 @@ def login():
                 break
             else: exit(v_res)
 
-        r = requests.get(f"{base_url}/pass/serviceLogin", params={'_json': "true", 'sid': sid}, cookies=cookies, headers=headers)
-        res = parse(r)
-
-    region = json.loads(requests.get(f"https://account.xiaomi.com/pass/user/login/region", headers=headers, cookies=cookies).text[11:])["data"]["region"]    
-
-    nonce, ssecurity = res['nonce'], res['ssecurity']
-    res['location'] += f"&clientSign={quote(base64.b64encode(hashlib.sha1(f'nonce={nonce}&{ssecurity}'.encode()).digest()))}"
-    serviceToken = requests.get(res['location'], headers=headers, cookies=cookies).cookies.get_dict()
-
-    micdata = {"userId": res['userId'], "new_bbs_serviceToken": serviceToken["new_bbs_serviceToken"], "region": region, "deviceId": deviceId}
-    with open("micdata.json", "w") as f: json.dump(micdata, f)
-    return micdata
-
-try:
-    with open('micdata.json') as f:
-        micdata = json.load(f)
-
-    if not all(micdata.get(k) for k in ("userId", "new_bbs_serviceToken", "region", "deviceId")):
-        raise ValueError
-
-    # ===== COLORS =====
-    BLUE = "\033[94m"
-    YELLOW = "\033[93m"
-    WHITE = "\033[97m"
-    BOLD = "\033[1m"
-    RESET = "\033[0m"
-
-    account_id = micdata['userId']
-
-    print(
-        f"\n{BLUE}{BOLD}╔══════════════════════════════════════╗{RESET}\n"
-        f"{BLUE}{BOLD}║     {RESET} {WHITE}{BOLD} PREVIOUS ACCOUNT DETAILS{RESET}       {BLUE}{BOLD}║{RESET}\n"
-        f"{BLUE}{BOLD}╠══════════════════════════════════════╣{RESET}\n"
-        f"{BLUE}{BOLD}║       {RESET} {YELLOW}Account ID:{RESET} {WHITE}{account_id}{RESET}        {BLUE}{BOLD}║{RESET}\n"
-        f"{BLUE}{BOLD}╚══════════════════════════════════════╝{RESET}\n"
-    )
-
-    input(
-        f"{YELLOW}➤ Press {WHITE}Enter{RESET}{YELLOW} to continue | Ctrl + D to logout{RESET}\n"
-    )
-
-except (FileNotFoundError, json.JSONDecodeError, EOFError, ValueError):
-    if os.path.exists('micdata.json'):
-        os.remove('micdata.json')
-
-    micdata = login()
-
-new_bbs_serviceToken = micdata["new_bbs_serviceToken"]
-
-deviceId = micdata["deviceId"]
-
-region = micdata['region']
-
-# ===== COLORS =====
-BOX = "\033[95m"      # ← Yaha color change karo
-YELLOW = "\033[93m"
-WHITE = "\033[97m"
-BOLD = "\033[1m"
-RESET = "\033[0m"
-
-print(
-    f"\n{BOX}{BOLD}╔══════════════════════════════════════╗{RESET}"
-)
-print(
-    f"{BOX}{BOLD}║{RESET}          {WHITE}{BOLD}ACCOUNT INFORMATION{RESET}         {BOX}{BOLD}║{RESET}"
-)
-print(
-    f"{BOX}{BOLD}╠══════════════════════════════════════╣{RESET}"
-)
-print(
-    f"{BOX}{BOLD}║{RESET} {YELLOW}          Account Region:{RESET} {WHITE}{region}{RESET}         {BOX}{BOLD}║{RESET}"
-)
-print(
-    f"{BOX}{BOLD}╚══════════════════════════════════════╝{RESET}\n"
-)
-
-api = "https://sgp-api.buy.mi.com/bbs/api/global/"
-
-U_state = api + "user/bl-switch/state"
+        r = 
 U_apply = api + "apply/bl-auth"
 U_info = api + "user/data"
 
